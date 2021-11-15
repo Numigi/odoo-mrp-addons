@@ -33,12 +33,6 @@ class MrpProduction__mrp_cost(models.Model):
             lambda m: m.product_id == self.product_id
         )
 
-    def __get_qty_done(self, move):
-        return move.product_uom._compute_quantity(
-            move.quantity_done,
-            move.product_id.uom_id,
-        )
-
     def _get_finished_move_value(self, consumed_moves):
         work_center_cost = self._get_workcenter_cost()
         return sum([-m.value for m in consumed_moves]) + work_center_cost
@@ -47,6 +41,12 @@ class MrpProduction__mrp_cost(models.Model):
         return sum(
             line._get_cost()
             for line in self.__get_unrecorded_time_lines()
+        )
+
+    def __get_qty_done(self, move):
+        return move.product_uom._compute_quantity(
+            move.quantity_done,
+            move.product_id.uom_id,
         )
 
     def __set_time_lines_recorded(self):
