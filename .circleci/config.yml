@@ -7,7 +7,7 @@ quay_io_login: &quay_io_login
 jobs:
   tests:
     machine:
-       image: ubuntu-2004:202111-02
+      image: ubuntu-2004:202111-02
     steps:
        - checkout
 
@@ -37,7 +37,7 @@ jobs:
   # it will trigger the publish of a new docker image.
   auto-tag:
     machine:
-       image: ubuntu-2004:202111-02
+      image: ubuntu-2004:202111-02
     steps:
       - checkout
       - run:
