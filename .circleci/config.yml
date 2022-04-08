@@ -6,7 +6,8 @@ quay_io_login: &quay_io_login
 
 jobs:
   tests:
-    machine: true
+    machine:
+       image: ubuntu-2004:202111-02
     steps:
        - checkout
 
@@ -35,7 +36,8 @@ jobs:
   # job that find the next tag for the current branch/repo and push the tag to github.
   # it will trigger the publish of a new docker image.
   auto-tag:
-    machine: true
+    machine:
+       image: ubuntu-2004:202111-02
     steps:
       - checkout
       - run:
