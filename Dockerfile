@@ -16,7 +16,7 @@ RUN gitoo install-all --conf_file /gitoo.yml --destination "${THIRD_PARTY_ADDONS
 
 USER odoo
 
-COPY mrp_cost /mnt/extra-addons/mrp_cost
+COPY product_configurator_mrp_enhanced /mnt/extra-addons/product_configurator_mrp_enhanced
 
 COPY .docker_files/main /mnt/extra-addons/main
 COPY .docker_files/odoo.conf /etc/odoo
