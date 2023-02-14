@@ -6,9 +6,11 @@ quay_io_login: &quay_io_login
 
 jobs:
   tests:
-    machine: true
+    machine:
+      image: ubuntu-2004:202111-02
     steps:
        - checkout
+
        - run:
            <<: *quay_io_login
 
@@ -27,27 +29,15 @@ jobs:
 #       - run:
 #          name: Codacy Coverage
 #          command: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -l python -r .log/coverage.xml
-
-       - store_test_results:
-          path: .log
-
-  testcafe:
-    machine: true
-    steps:
-      - checkout
-
-      - run:
-          name: Build -- Init Database
-          command: docker-compose run --rm odoo odoo --stop-after-init -i main
-
-#      - run:
-#          name: Run Tests With Chrome
-#          command: docker-compose run --rm testcafe 'chrome:headless --no-sandbox' /tests/*.js --skip-js-errors --speed 0.5
+#
+#       - store_test_results:
+#          path: .log
 
   # job that find the next tag for the current branch/repo and push the tag to github.
   # it will trigger the publish of a new docker image.
   auto-tag:
-    machine: true
+    machine:
+      image: ubuntu-2004:202111-02
     steps:
       - checkout
       - run:
@@ -68,8 +58,6 @@ workflows:
     jobs:
       - tests:
           context: quay.io
-
-      - testcafe
 
       - auto-tag:
           context: nws
