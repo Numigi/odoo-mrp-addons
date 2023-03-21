@@ -12,6 +12,7 @@
     "summary": "Install all addons required for testing.",
     "depends": [
         "mrp_cost",
+        "mrp_timesheet",
     ],
     "installable": True,
 }
