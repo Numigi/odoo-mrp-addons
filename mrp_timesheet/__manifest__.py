@@ -17,9 +17,11 @@
         "project",
     ],
     "data": [
-        'views/res_config_settings_views.xml',
+        'views/account_analytic_line_view.xml',
         'views/mrp_bom_views.xml',
         'views/mrp_production_views.xml',
+        'views/res_config_settings_views.xml',
+
     ],
     "installable": True,
 }

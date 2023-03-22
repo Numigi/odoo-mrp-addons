@@ -14,8 +14,10 @@ class MrpWorkcenterProductivity(models.Model):
         For compatibility with analytic_activity_cost
         """
         self.ensure_one()
-        employee_id = self.env['hr.employee'].sudo().search(
-            [('user_id', '=', self.user_id.id)], limit=1)
+        employee_id = False
+        if self.user_id:
+            employee_id = self.env['hr.employee'].sudo().search(
+                [('user_id', '=', self.user_id.id)], limit=1)
         return {
             "name": "{} / {}".format(self.production_id.name,
                                      self.workorder_id.name),
@@ -24,7 +26,9 @@ class MrpWorkcenterProductivity(models.Model):
             "unit_amount": self.duration / 60,  # convert minutes to hours
             "amount": -self.duration / 60 * self.workcenter_id.costs_hour,
             "project_id": self.production_id.project_id.id,
-            "employee_id": employee_id.id,
+            "employee_id": employee_id.id if employee_id else False,
+            "manufacturing_order_id": self.production_id.id,
+            "workorder_id": self.workorder_id.id,
         }
 
     def generate_mrp_work_analytic_line(self):
