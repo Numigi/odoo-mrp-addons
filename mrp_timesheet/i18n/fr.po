@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-21 18:01+0000\n"
-"PO-Revision-Date: 2023-03-21 18:01+0000\n"
+"POT-Creation-Date: 2023-03-23 22:14+0000\n"
+"PO-Revision-Date: 2023-03-23 22:14+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -19,6 +19,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:mrp_timesheet.field_mrp_production__analytic_account_id
 msgid "Analytic Account"
 msgstr "Compte analytique"
+
+#. module: mrp_timesheet
+#: model:ir.model,name:mrp_timesheet.model_account_analytic_line
+msgid "Analytic Line"
+msgstr "Ligne analytique"
 
 #. module: mrp_timesheet
 #: model:ir.model,name:mrp_timesheet.model_mrp_bom
@@ -36,9 +41,24 @@ msgid "Link this project to an analytic account if you need financial management
 msgstr "Associe ce projet à un compte analytique si vous avez besoin de la gestion financière des projets. Il vous permet de relier des projets aux budgets, la planification, l'analyse des coûts et des revenus, les feuilles de prestations sur des projets, etc."
 
 #. module: mrp_timesheet
+#: model_terms:ir.ui.view,arch_db:mrp_timesheet.custom_account_analytic_line_form_ext
+msgid "Manufacture"
+msgstr "Produire"
+
+#. module: mrp_timesheet
+#: model_terms:ir.ui.view,arch_db:mrp_timesheet.custom_account_analytic_line_filter_view
+msgid "Manufacturing Order"
+msgstr "Ordre de fabrication"
+
+#. module: mrp_timesheet
+#: model_terms:ir.ui.view,arch_db:mrp_timesheet.custom_account_analytic_line_filter_view
+msgid "Manufacturing Orders"
+msgstr "Ordres de fabrication"
+
+#. module: mrp_timesheet
 #: model:ir.model,name:mrp_timesheet.model_mrp_production
 msgid "Production Order"
-msgstr ""
+msgstr "Ordre de production"
 
 #. module: mrp_timesheet
 #: model:ir.model.fields,field_description:mrp_timesheet.field_mrp_bom__project_id
@@ -49,9 +69,19 @@ msgid "Project"
 msgstr "Projet"
 
 #. module: mrp_timesheet
+#: model:ir.model.fields,field_description:mrp_timesheet.field_account_analytic_line__manufacturing_order_id
+msgid "Related Manufacturing Order"
+msgstr "Ordre de fabrication associé"
+
+#. module: mrp_timesheet
 #: model_terms:ir.ui.view,arch_db:mrp_timesheet.res_config_settings_view_form
 msgid "Time Tracking"
 msgstr "Suivi des heures"
+
+#. module: mrp_timesheet
+#: model:ir.model.fields,field_description:mrp_timesheet.field_account_analytic_line__workorder_id
+msgid "Work Order"
+msgstr "Ordre de travail"
 
 #. module: mrp_timesheet
 #: model:ir.model,name:mrp_timesheet.model_mrp_workcenter_productivity

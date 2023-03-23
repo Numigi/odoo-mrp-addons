@@ -1,5 +1,5 @@
-# Copyright (C) 2021 Open Source Integrators
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+# © 2023 - today Numigi (tm) and all its contributors (https://bit.ly/numigiens)
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
 
 from odoo import api, fields, models
@@ -16,11 +16,13 @@ class MrpWorkcenterProductivity(models.Model):
         self.ensure_one()
         employee_id = False
         if self.user_id:
-            employee_id = self.env['hr.employee'].sudo().search(
-                [('user_id', '=', self.user_id.id)], limit=1)
+            employee_id = (
+                self.env["hr.employee"]
+                .sudo()
+                .search([("user_id", "=", self.user_id.id)], limit=1)
+            )
         return {
-            "name": "{} / {}".format(self.production_id.name,
-                                     self.workorder_id.name),
+            "name": "{} / {}".format(self.production_id.name, self.workorder_id.name),
             "account_id": self.production_id.analytic_account_id.id,
             "date": fields.Date.today(),
             "unit_amount": self.duration / 60,  # convert minutes to hours

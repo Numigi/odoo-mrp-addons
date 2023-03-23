@@ -5,8 +5,8 @@
         <field name="model">mrp.production</field>
         <field name="inherit_id" ref="mrp_analytic.mrp_production_form_view"/>
         <field name="arch" type="xml">
-            <field name="availability"  position="after">
-                <field name="project_id"/>
+            <field name="availability" position="after">
+                <field name="project_id" required="1"/>
                 <field name="analytic_account_id" position="move"/>
             </field>
         </field>
