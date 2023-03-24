@@ -36,7 +36,7 @@ jobs:
   # it will trigger the publish of a new docker image.
   auto-tag:
     machine:
-      image: ubuntu-2004:202111-02
+      image: true
     steps:
       - checkout
       - run:
