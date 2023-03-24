@@ -13,7 +13,10 @@ class MrpWorkcenterProductivity(models.Model):
         Prepare additional values for Analytic Items created.
         For compatibility with analytic_activity_cost
         """
+
         self.ensure_one()
+        if not self.production_id.analytic_account_id:
+            return {}
         employee_id = False
         if self.user_id:
             employee_id = (
@@ -37,8 +40,9 @@ class MrpWorkcenterProductivity(models.Model):
         AnalyticLine = self.env["account.analytic.line"].sudo()
         for timelog in self:
             line_vals = timelog._prepare_mrp_workorder_analytic_item()
-            analytic_line = AnalyticLine.create(line_vals)
-            analytic_line.on_change_unit_amount()
+            if line_vals:
+                analytic_line = AnalyticLine.create(line_vals)
+                analytic_line.on_change_unit_amount()
 
     @api.model
     def create(self, vals):
