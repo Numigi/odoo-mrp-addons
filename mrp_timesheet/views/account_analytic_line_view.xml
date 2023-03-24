@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <record id="view_account_analytic_line_tree_inherit_account" model="ir.ui.view">
+            <field name="name">account.analytic.line.tree.inherit.mrp_timesheet</field>
+            <field name="model">account.analytic.line</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_line_tree"/>
+            <field name="arch" type="xml">
+                <field name="account_id" position="after">
+                    <field name="manufacturing_order_id" invisible="1"/>
+                    <field name="workorder_id" invisible="1"/>
+                </field>
+            </field>
+        </record>
+        <record id="custom_account_analytic_line_form_ext" model="ir.ui.view">
+            <field name="name">account.analytic.line.custom.form</field>
+            <field name="model">account.analytic.line</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_line_form"/>
+            <field name="arch" type="xml">
+                <group name="amount" position="after">
+                    <group name="manufacture" string="Manufacture"
+                           attrs="{'invisible': [('manufacturing_order_id', '=', False)]}">
+                        <field name="manufacturing_order_id" readonly="1"/>
+                        <field name="workorder_id"  readonly="1" />
+                    </group>
+                </group>
+            </field>
+        </record>
+
+        <record id="custom_account_analytic_line_filter_view" model="ir.ui.view">
+            <field name="name">account.analytic.line.custom.filter</field>
+            <field name="model">account.analytic.line</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_line_filter"/>
+            <field name="arch" type="xml">
+                <field name="tag_ids" position="after">
+                    <filter
+                            name="filter_is_related_to_mo"
+                            string="Manufacturing Orders"
+                            domain="[('manufacturing_order_id','!=',False)]"
+                    />
+                    <filter
+                            string="Manufacturing Order"
+                            name="group_by_mo"
+                            domain="[]"
+                            context="{'group_by': 'manufacturing_order_id'}"
+                    />
+                </field>
+            </field>
+        </record>
+
+    </data>
+</odoo>

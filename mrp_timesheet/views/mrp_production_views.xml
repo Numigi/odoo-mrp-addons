@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_production_form_view" model="ir.ui.view">
+        <field name="name">mrp.production.form.inherit.mrp_timesheet</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp_analytic.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <field name="availability" position="after">
+                <field name="project_id" required="1"/>
+                <field name="analytic_account_id" position="move"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="mrp_production_tree_view" model="ir.ui.view">
+        <field name="name">mrp.production.tree.inherit.mrp_timesheet</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp_analytic.mrp_production_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="analytic_account_id" position="before">
+                <field name="project_id"/>
+            </field>
+        </field>
+    </record>
+</odoo>
