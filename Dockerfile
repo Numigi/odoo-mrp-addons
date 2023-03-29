@@ -13,6 +13,7 @@ RUN gitoo install-all --conf_file /gitoo.yml --destination "${THIRD_PARTY_ADDONS
 
 USER odoo
 
+COPY mrp_bom_cost_scheduled_action /mnt/extra-addons/mrp_bom_cost_scheduled_action
 COPY mrp_cost /mnt/extra-addons/mrp_cost
 COPY mrp_timesheet /mnt/extra-addons/mrp_timesheet
 

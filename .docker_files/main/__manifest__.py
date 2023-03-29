@@ -11,6 +11,7 @@
     "category": "Other",
     "summary": "Install all addons required for testing.",
     "depends": [
+        "mrp_bom_cost_scheduled_action",
         "mrp_cost",
         "mrp_timesheet",
     ],
