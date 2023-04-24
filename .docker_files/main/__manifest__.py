@@ -14,6 +14,7 @@
         "mrp_bom_cost_scheduled_action",
         "mrp_cost",
         "mrp_timesheet",
+        "mrp_work_order_calendar_customer",
     ],
     "installable": True,
 }

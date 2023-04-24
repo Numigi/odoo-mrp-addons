@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+    <record id="workcenter_line_calendar_customer" model="ir.ui.view">
+        <field name="name">mrp.production.work.order.calendar.customer</field>
+        <field name="model">mrp.workorder</field>
+        <field name="inherit_id" ref="mrp.workcenter_line_calendar"/>
+        <field name="arch" type="xml">
+            <!-- Make these fields invisible -->
+            <xpath expr="//calendar/field[@name='workcenter_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//calendar/field[@name='production_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <!-- Use these fields instead -->
+            <xpath expr="//calendar/field[@name='workcenter_id']" position="after">
+                <field name="product_id"/>
+            </xpath>
+            <xpath expr="//calendar/field[@name='production_id']" position="after">
+                <field name="partner_id"/>
+            </xpath>
+        </field>
+    </record>
+    </data>
+</odoo>

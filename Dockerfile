@@ -16,6 +16,7 @@ USER odoo
 COPY mrp_bom_cost_scheduled_action /mnt/extra-addons/mrp_bom_cost_scheduled_action
 COPY mrp_cost /mnt/extra-addons/mrp_cost
 COPY mrp_timesheet /mnt/extra-addons/mrp_timesheet
+COPY mrp_work_order_calendar_customer /mnt/extra-addons/mrp_work_order_calendar_customer
 
 COPY .docker_files/main /mnt/extra-addons/main
 COPY .docker_files/odoo.conf /etc/odoo
