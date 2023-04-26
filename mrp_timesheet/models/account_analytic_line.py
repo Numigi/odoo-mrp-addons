@@ -15,10 +15,6 @@ class AccountAnalyticLine(models.Model):
         "mrp.workorder",
         string="Work Order",
     )
-    time_tracking_line_id = fields.Many2one(
-        "mrp.workcenter.productivit",
-        string="Time Tracking Line",
-    )
 
     @api.multi
     def _timesheet_postprocess_values(self, values):

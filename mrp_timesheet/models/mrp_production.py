@@ -10,7 +10,6 @@ class MrpProduction(models.Model):
     project_id = fields.Many2one(
         "project.project",
         domain=[("allow_timesheets", "=", True)],
-        related='bom_id.project_id',
         string="Project"
     )
     analytic_account_id = fields.Many2one(

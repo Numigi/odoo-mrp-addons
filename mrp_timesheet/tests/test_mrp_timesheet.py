@@ -44,7 +44,6 @@ class TestMRPWorkOrder(TestMRP):
                 "description": self.env.ref("mrp.block_reason7").name,
                 "user_id": self.env.ref("base.user_demo").id,
                 "workorder_id": self.workorder_id.id,
-                "time_tracking_line_id": self.id,
             }
         )
         # duration => 60min
@@ -52,9 +51,9 @@ class TestMRPWorkOrder(TestMRP):
             [
                 ("manufacturing_order_id", "=", self.mo.id),
                 ("workorder_id", "=", self.workorder_id.id),
-                ("time_tracking_line_id", "=", self.time_tracking_line.id),
             ]
         )
+        self.time_tracking_line.account_analytic_line_id = self.analytic_line_id.id
         assert self.analytic_line_id
 
     def test_analytic_line_employee(self):

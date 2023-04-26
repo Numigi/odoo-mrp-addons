@@ -8,6 +8,12 @@ from odoo import api, fields, models
 class MrpWorkcenterProductivity(models.Model):
     _inherit = "mrp.workcenter.productivity"
 
+    account_analytic_line_id = fields.Many2one(
+        "account.analytic.line",
+        ondelete='cascade',
+        string="Account Analytic Line",
+    )
+
     def _prepare_mrp_workorder_analytic_item(self):
         """
         Prepare additional values for Analytic Items created.
@@ -34,12 +40,10 @@ class MrpWorkcenterProductivity(models.Model):
             "employee_id": employee_id.id if employee_id else False,
             "manufacturing_order_id": self.production_id.id,
             "workorder_id": self.workorder_id.id,
-            "time_tracking_line_id": self.id,
         }
 
     def _get_time_tracking_line(self):
-        return self.env["account.analytic.line"].sudo().search([
-            ('time_tracking_line_id', '=', self.id)])
+        return self.account_analytic_line_id
 
     def generate_mrp_work_analytic_line(self):
         AnalyticLine = self.env["account.analytic.line"].sudo()
@@ -48,6 +52,7 @@ class MrpWorkcenterProductivity(models.Model):
             if line_vals:
                 analytic_line = AnalyticLine.create(line_vals)
                 analytic_line.on_change_unit_amount()
+                timelog.account_analytic_line_id = analytic_line.id
 
     def update_mrp_work_analytic_line(self):
         time_tracking_line = self._get_time_tracking_line()
