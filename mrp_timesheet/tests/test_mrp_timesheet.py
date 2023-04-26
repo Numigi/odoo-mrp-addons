@@ -33,8 +33,9 @@ class TestMRPWorkOrder(TestMRP):
 
         date_start = time_to_string_utc_datetime(time(10, 43, 22))
         date_end = time_to_string_utc_datetime(time(11, 43, 22))
+        self.new_date_end = time_to_string_utc_datetime(time(12, 43, 22))
 
-        self.env["mrp.workcenter.productivity"].create(
+        self.time_tracking_line = self.env["mrp.workcenter.productivity"].create(
             {
                 "workcenter_id": self.workcenter_id.id,
                 "date_start": date_start,
@@ -43,6 +44,7 @@ class TestMRPWorkOrder(TestMRP):
                 "description": self.env.ref("mrp.block_reason7").name,
                 "user_id": self.env.ref("base.user_demo").id,
                 "workorder_id": self.workorder_id.id,
+                "time_tracking_line_id": self.id,
             }
         )
         # duration => 60min
@@ -50,12 +52,14 @@ class TestMRPWorkOrder(TestMRP):
             [
                 ("manufacturing_order_id", "=", self.mo.id),
                 ("workorder_id", "=", self.workorder_id.id),
+                ("time_tracking_line_id", "=", self.time_tracking_line.id),
             ]
         )
         assert self.analytic_line_id
 
     def test_analytic_line_employee(self):
-        assert self.analytic_line_id.employee_id == self.env.ref("hr.employee_qdp")
+        assert self.analytic_line_id.employee_id == self.env.ref(
+            "hr.employee_qdp")
 
     def test_analytic_line_project(self):
         assert self.analytic_line_id.project_id == self.project_mrp_id
@@ -72,3 +76,13 @@ class TestMRPWorkOrder(TestMRP):
     def test_analytic_line_amount(self):
         # Expected (-60 / 60) * 40 => - 40
         assert self.analytic_line_id.amount == -40
+
+    def test_update_duration_time_tracking_for_analytic_line_unit_amount(self):
+        # Expected (120 / 60) => 2
+        self.time_tracking_line.write({'date_end': self.new_date_end})
+        assert self.analytic_line_id.unit_amount == 2
+
+    def test_update_duration_time_tracking_for_analytic_line_amount(self):
+        # Expected (-120 / 60) * 40 => - 40
+        self.time_tracking_line.write({'date_end': self.new_date_end})
+        assert self.analytic_line_id.amount == -80

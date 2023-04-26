@@ -34,7 +34,12 @@ class MrpWorkcenterProductivity(models.Model):
             "employee_id": employee_id.id if employee_id else False,
             "manufacturing_order_id": self.production_id.id,
             "workorder_id": self.workorder_id.id,
+            "time_tracking_line_id": self.id,
         }
+
+    def _get_time_tracking_line(self):
+        return self.env["account.analytic.line"].sudo().search([
+            ('time_tracking_line_id', '=', self.id)])
 
     def generate_mrp_work_analytic_line(self):
         AnalyticLine = self.env["account.analytic.line"].sudo()
@@ -43,6 +48,16 @@ class MrpWorkcenterProductivity(models.Model):
             if line_vals:
                 analytic_line = AnalyticLine.create(line_vals)
                 analytic_line.on_change_unit_amount()
+
+    def update_mrp_work_analytic_line(self):
+        time_tracking_line = self._get_time_tracking_line()
+        if not time_tracking_line:
+            self.generate_mrp_work_analytic_line()
+            time_tracking_line = self._get_time_tracking_line()
+        line_vals = self._prepare_mrp_workorder_analytic_item()
+        if line_vals:
+            time_tracking_line.write(line_vals)
+            time_tracking_line.on_change_unit_amount()
 
     @api.model
     def create(self, vals):
@@ -54,6 +69,8 @@ class MrpWorkcenterProductivity(models.Model):
     @api.multi
     def write(self, vals):
         res = super().write(vals)
-        if vals.get("date_end"):
-            self.generate_mrp_work_analytic_line()
+        if vals.get("date_start") or vals.get("date_end"):
+            for line in self:
+                if line.date_end:
+                    line.update_mrp_work_analytic_line()
         return res

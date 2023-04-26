@@ -15,6 +15,10 @@ class AccountAnalyticLine(models.Model):
         "mrp.workorder",
         string="Work Order",
     )
+    time_tracking_line_id = fields.Many2one(
+        "mrp.workcenter.productivit",
+        string="Time Tracking Line",
+    )
 
     @api.multi
     def _timesheet_postprocess_values(self, values):
@@ -25,7 +29,8 @@ class AccountAnalyticLine(models.Model):
         instead of the cost per hour per employee.
 
         """
-        result = super(AccountAnalyticLine, self)._timesheet_postprocess_values(values)
+        result = super(AccountAnalyticLine,
+                       self)._timesheet_postprocess_values(values)
         sudo_self = self.sudo()
         for timesheet in sudo_self:
             if timesheet.manufacturing_order_id:
