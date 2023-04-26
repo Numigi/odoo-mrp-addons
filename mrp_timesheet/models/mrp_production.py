@@ -8,7 +8,9 @@ class MrpProduction(models.Model):
     _inherit = "mrp.production"
 
     project_id = fields.Many2one(
-        "project.project", domain=[("allow_timesheets", "=", True)], string="Project"
+        "project.project",
+        domain=[("allow_timesheets", "=", True)],
+        string="Project"
     )
     analytic_account_id = fields.Many2one(
         related="project_id.analytic_account_id", store=True, readonly=True
@@ -16,5 +18,11 @@ class MrpProduction(models.Model):
 
     @api.onchange("bom_id", "bom_id.project_id")
     def _onchange_project_id(self):
+        project = int(
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("mrp_timesheet.project_id")
+        )
         if self.bom_id and self.bom_id.project_id:
-            self.project_id = self.bom_id.project_id.id
+            project = self.bom_id.project_id.id
+        self.project_id = project
