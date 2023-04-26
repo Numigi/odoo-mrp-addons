@@ -18,10 +18,11 @@ class MrpProduction(models.Model):
 
     @api.onchange("bom_id", "bom_id.project_id")
     def _onchange_project_id(self):
+        project = int(
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("mrp_timesheet.project_id")
+        )
         if self.bom_id and self.bom_id.project_id:
-            default_project = int(
-                self.env["ir.config_parameter"]
-                .sudo()
-                .get_param("mrp_timesheet.project_id")
-            )
-            self.project_id = self.bom_id.project_id.id or default_project
+            project = self.bom_id.project_id.id
+        self.project_id = project
