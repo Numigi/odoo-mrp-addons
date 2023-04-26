@@ -70,3 +70,11 @@ class MrpWorkcenterProductivity(models.Model):
             if line.date_end:
                 line.update_mrp_work_analytic_line()
         return res
+
+    @api.multi
+    def unlink(self):
+        for line in self:
+            if line.account_analytic_line_id:
+                line.account_analytic_line_id.unlink()
+        return super().unlink()
+
