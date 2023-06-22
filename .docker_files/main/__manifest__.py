@@ -11,6 +11,7 @@
     "category": "Other",
     "summary": "Install all addons required for testing.",
     "depends": [
+        "mrp_production_split",
         "product_configurator_mrp_enhanced",
     ],
     "installable": True,

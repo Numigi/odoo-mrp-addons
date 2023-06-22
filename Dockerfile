@@ -16,6 +16,7 @@ RUN gitoo install-all --conf_file /gitoo.yml --destination "${THIRD_PARTY_ADDONS
 
 USER odoo
 
+COPY mrp_production_split /mnt/extra-addons/mrp_production_split
 COPY product_configurator_mrp_enhanced /mnt/extra-addons/product_configurator_mrp_enhanced
 
 COPY .docker_files/main /mnt/extra-addons/main
