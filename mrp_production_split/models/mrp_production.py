@@ -108,7 +108,8 @@ class MrpProduction(models.Model):
                                                number_of_backorder_created]
             production_to_backorders[production] = production_backorders
             production_ids.add(production.id)  # previously update
-            production_ids.add(production_backorders.id)  # previously update
+            for production_backorder in production_backorders:
+                production_ids.add(production_backorder.id)  # previously update
             index += number_of_backorder_created
 
         # Split the `stock.move` among new backorders.
