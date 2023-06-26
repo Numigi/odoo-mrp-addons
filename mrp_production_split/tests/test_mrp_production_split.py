@@ -22,6 +22,7 @@ class TestMrpProductionSplit(CommonCase):
     #     with self.assertRaisesRegex(UserError, r"Cannot split.*"):
     #         self._mrp_production_split(self.production)
 
+
     def test_mrp_production_split_cancel(self):
         self.production.action_cancel()
         with self.assertRaisesRegex(UserError, r"Cannot split.*"):
