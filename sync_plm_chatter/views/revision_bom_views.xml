@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+        <record id="revision_bom_inherit_chatter" model="ir.ui.view">
+            <field name="name">revision.bom.inherit.chatter</field>
+            <field name="model">revision.bom</field>
+            <field name="inherit_id" ref="sync_plm.revision_bom_view_form"/>
+            <field name="arch" type="xml">
+            <form position="inside">
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" />
+                    <field name="activity_ids" />
+                    <field name="message_ids" widget="mail_thread" />
+                </div>
+            </form>
+            </field>
+        </record>
+
+</odoo>
