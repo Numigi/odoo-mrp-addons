@@ -15,10 +15,6 @@ services:
     command: odoo
     environment:
       - LOG_ODOO=/var/log/odoo
-    networks:
-      default:
-        aliases:
-          - odoo.localtest.me
   db:
     image: postgres:9.6
     environment:
