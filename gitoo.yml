@@ -7,4 +7,5 @@
   branch: "14.0"
   includes:
     - product_configurator
+    - product_configurator_mrp_component
     - product_configurator_mrp
