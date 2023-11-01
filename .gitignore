@@ -12,3 +12,4 @@ docker-compose.override.yml
 .third-party-addons
 .pytest_cache
 .vscode/
+.log
