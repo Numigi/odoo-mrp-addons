@@ -35,9 +35,10 @@ class TestMRP(SavepointCase):
         cls.workcenter_cost = 100
         cls.workcenter = cls.env["mrp.workcenter"].create(
             {
-            "name": "My Work Center",
-            "costs_hour": cls.workcenter_cost,
-        })
+                "name": "My Work Center",
+                "costs_hour": cls.workcenter_cost,
+            }
+        )
 
         cls.bom = cls.env["mrp.bom"].create(
             {
@@ -46,8 +47,9 @@ class TestMRP(SavepointCase):
                 "bom_line_ids": [
                     (0, 0, cls._get_bom_line_vals(cls.product_b, 1)),
                     (0, 0, cls._get_bom_line_vals(cls.product_c, 2)),
-                ]
-            })
+                ],
+            }
+        )
 
         cls.order = cls.env["mrp.production"].create(
             {
@@ -96,12 +98,20 @@ class TestMRP(SavepointCase):
         assert move.value == 200  # 2 hours * 100
 
     def _run_production(self):
-        wizard = self.env['mrp.product.produce'].with_context({
-            'active_id': self.order.id,
-            'active_ids': [self.order.id],
-        }).create({
-            'product_qty': 1.0,
-        })
+        wizard = (
+            self.env["mrp.product.produce"]
+            .with_context(
+                {
+                    "active_id": self.order.id,
+                    "active_ids": [self.order.id],
+                }
+            )
+            .create(
+                {
+                    "product_qty": 1.0,
+                }
+            )
+        )
         wizard._onchange_product_qty()
         wizard.do_produce()
         self.order.post_inventory()
