@@ -54,9 +54,7 @@ class ProductConfigSession(models.Model):
             for product in attr_products:
                 bom_line_vals = {"product_id": product.id}
                 specs = self.get_onchange_specifications(model="mrp.bom.line")
-                updates = mrpBomLine.onchange(
-                    bom_line_vals, ["product_id"], specs
-                )
+                updates = mrpBomLine.onchange(bom_line_vals, ["product_id"], specs)
                 values = updates.get("value", {})
                 values = self.get_vals_to_write(values=values, model="mrp.bom.line")
                 values.update(bom_line_vals)
@@ -124,4 +122,3 @@ class ProductConfigSession(models.Model):
                     operation_line.copy(default={"bom_id": mrp_bom_id.id})
             return mrp_bom_id
         return False
-

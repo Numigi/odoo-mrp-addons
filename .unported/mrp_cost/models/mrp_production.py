@@ -1,7 +1,7 @@
 # © 2020 - today Numigi (tm) and all its contributors (https://bit.ly/numigiens)
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
-from odoo import api, fields, models
+from odoo import models
 
 
 class MrpProduction__mrp_cost(models.Model):
@@ -38,10 +38,7 @@ class MrpProduction__mrp_cost(models.Model):
         return sum([-m.value for m in consumed_moves]) + work_center_cost
 
     def _get_workcenter_cost(self):
-        return sum(
-            line._get_cost()
-            for line in self.__get_unrecorded_time_lines()
-        )
+        return sum(line._get_cost() for line in self.__get_unrecorded_time_lines())
 
     def __get_qty_done(self, move):
         return move.product_uom._compute_quantity(
@@ -54,5 +51,6 @@ class MrpProduction__mrp_cost(models.Model):
         lines.write({"cost_already_recorded": True})
 
     def __get_unrecorded_time_lines(self):
-        return self.mapped("workorder_ids.time_ids").filtered(lambda line: 
-            line.date_end and not line.cost_already_recorded)
+        return self.mapped("workorder_ids.time_ids").filtered(
+            lambda line: line.date_end and not line.cost_already_recorded
+        )
