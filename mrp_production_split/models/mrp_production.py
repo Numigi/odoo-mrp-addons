@@ -36,47 +36,9 @@ class MrpProduction(models.Model):
         action["context"] = {"default_production_id": self.id}
         return action
 
-    def _split_productions(
-        self, amounts=False, cancel_remaning_qty=False, set_consumed_qty=False
+    def _create_backorder(
+        self, initial_qty_by_production, amounts, backorder_vals_list
     ):
-        """Splits productions into productions smaller quantities to produce, i.e.
-        creates its backorders.
-        :param dict amounts: a dict with a production as key and a list value containing
-        the amounts each production split should produce including the original
-        production,
-        e.g. {mrp.production(1,): [3, 2]} will result in mrp.production(1,)
-        having a product_qty=3 and a new backorder with product_qty=2.
-        :return: mrp.production records in order of [orig_prod_1, backorder_prod_1,
-        backorder_prod_2, orig_prod_2, backorder_prod_2, etc.]
-        """
-
-        def _default_amounts(production):
-            return [production.qty_producing, production._get_quantity_to_backorder()]
-
-        if not amounts:
-            amounts = {}
-        for production in self:
-            mo_amounts = amounts.get(production)
-            if not mo_amounts:
-                amounts[production] = _default_amounts(production)
-                continue
-            total_amount = sum(mo_amounts)
-            diff = float_compare(
-                production.product_qty,
-                total_amount,
-                precision_rounding=production.product_uom_id.rounding,
-            )
-            if diff > 0 and not cancel_remaning_qty:
-                amounts[production].append(production.product_qty - total_amount)
-            elif diff < 0 or production.state in ["done", "cancel"]:
-                raise UserError(
-                    _("Unable to split with more than the quantity to produce.")
-                )
-
-        backorder_vals_list = []
-        initial_qty_by_production = {}
-
-        # Create the backorders.
         for production in self:
             initial_qty_by_production[production] = production.product_qty
             if production.backorder_sequence == 0:  # Activate backorder naming
@@ -108,16 +70,37 @@ class MrpProduction(models.Model):
                         state="confirmed",
                     )
                 )
+        return initial_qty_by_production, backorder_vals_list
 
-        backorders = (
-            self.env["mrp.production"]
-            .with_context(skip_confirm=True)
-            .create(backorder_vals_list)
-        )
+    def _handle_production_amount(self, amounts, _default_amounts, cancel_remaning_qty):
+        for production in self:
+            mo_amounts = amounts.get(production)
+            if not mo_amounts:
+                amounts[production] = _default_amounts(production)
+                continue
+            total_amount = sum(mo_amounts)
+            diff = float_compare(
+                production.product_qty,
+                total_amount,
+                precision_rounding=production.product_uom_id.rounding,
+            )
+            if diff > 0 and not cancel_remaning_qty:
+                amounts[production].append(production.product_qty - total_amount)
+            elif diff < 0 or production.state in ["done", "cancel"]:
+                raise UserError(
+                    _("Unable to split with more than the quantity to produce.")
+                )
+        return amounts
 
-        index = 0
-        production_to_backorders = {}
-        production_ids = OrderedSet()
+    def _handle_production_to_backorders(
+        self,
+        amounts,
+        _default_amounts,
+        backorders,
+        index,
+        production_to_backorders,
+        production_ids,
+    ):
         for production in self:
             number_of_backorder_created = (
                 len(amounts.get(production, _default_amounts(production))) - 1
@@ -130,10 +113,15 @@ class MrpProduction(models.Model):
             for production_backorder in production_backorders:
                 production_ids.add(production_backorder.id)  # previously update
             index += number_of_backorder_created
+        return index, production_to_backorders, production_ids
 
-        # Split the `stock.move` among new backorders.
-        new_moves_vals = []
-        moves = []
+    def _process_stock_moves(
+        self,
+        new_moves_vals,
+        moves,
+        production_to_backorders,
+        initial_qty_by_production,
+    ):
         for production in self:
             for move in production.move_raw_ids | production.move_finished_ids:
                 if move.additional:
@@ -157,24 +145,17 @@ class MrpProduction(models.Model):
                         move_vals["production_id"] = backorder.id
                     new_moves_vals.append(move_vals)
                     moves.append(move)
+        return new_moves_vals, moves
 
-        backorder_moves = self.env["stock.move"].create(new_moves_vals)
-        # Split `stock.move.line`s. 2 options for this:
-        # - do_unreserve -> action_assign
-        # - Split the reserved amounts manually
-        # The first option would be easier to maintain since it's less code
-        # However it could be slower (due to `stock.quant` update) and could
-        # create inconsistencies in mass production if a new lot higher in a
-        # FIFO strategy arrives between the reservation and the backorder creation
-        move_to_backorder_moves = defaultdict(lambda: self.env["stock.move"])
-        for move, backorder_move in zip(moves, backorder_moves):
-            move_to_backorder_moves[move] |= backorder_move
-
-        move_lines_vals = []
-        assigned_moves = set()
-        partially_assigned_moves = set()
-        move_lines_to_unlink = set()
-
+    def _process_backorder_move_lines(
+        self,
+        move_lines_vals,
+        set_consumed_qty,
+        move_to_backorder_moves,
+        assigned_moves,
+        partially_assigned_moves,
+        move_lines_to_unlink,
+    ):
         for initial_move, backorder_moves in move_to_backorder_moves.items():
             ml_by_move = []
             product_uom = initial_move.product_id.uom_id
@@ -265,21 +246,16 @@ class MrpProduction(models.Model):
                     lambda ml: not ml.product_uom_qty and not ml.qty_done
                 ).ids
             )
-
-        self.env["stock.move"].browse(assigned_moves).write({"state": "assigned"})
-        self.env["stock.move"].browse(partially_assigned_moves).write(
-            {"state": "partially_available"}
+        return (
+            move_lines_vals,
+            move_lines_to_unlink,
+            assigned_moves,
+            partially_assigned_moves,
         )
-        # Avoid triggering a useless _recompute_state
-        self.env["stock.move.line"].browse(move_lines_to_unlink).write(
-            {"move_id": False}
-        )
-        self.env["stock.move.line"].browse(move_lines_to_unlink).unlink()
-        self.env["stock.move.line"].create(move_lines_vals)
 
-        # We need to adapt `duration_expected` on both the original workorders and their
-        # backordered workorders. To do that, we use the original `duration_expected`
-        # and the ratio of the quantity produced and the quantity to produce.
+    def _process_adaptation_of_workorders(
+        self, initial_qty_by_production, production_to_backorders
+    ):
         for production in self:
             initial_qty = initial_qty_by_production[production]
             initial_workorder_remaining_qty = []
@@ -311,6 +287,119 @@ class MrpProduction(models.Model):
                     initial_workorder_remaining_qty[index % workorders_len] = max(
                         remaining_qty - workorder.qty_produced, 0
                     )
+
+    def _split_productions(
+        self, amounts=False, cancel_remaning_qty=False, set_consumed_qty=False
+    ):
+        """Splits productions into productions smaller quantities to produce, i.e.
+        creates its backorders.
+        :param dict amounts: a dict with a production as key and a list value containing
+        the amounts each production split should produce including the original
+        production,
+        e.g. {mrp.production(1,): [3, 2]} will result in mrp.production(1,)
+        having a product_qty=3 and a new backorder with product_qty=2.
+        :return: mrp.production records in order of [orig_prod_1, backorder_prod_1,
+        backorder_prod_2, orig_prod_2, backorder_prod_2, etc.]
+        """
+
+        def _default_amounts(production):
+            return [production.qty_producing, production._get_quantity_to_backorder()]
+
+        if not amounts:
+            amounts = {}
+
+        # Handle production amount computation
+        amounts = self._handle_production_amount(
+            amounts, _default_amounts, cancel_remaning_qty
+        )
+
+        backorder_vals_list = []
+        initial_qty_by_production = {}
+
+        # Create the backorders.
+        initial_qty_by_production, backorder_vals_list = self._create_backorder(
+            initial_qty_by_production, amounts, backorder_vals_list
+        )
+
+        backorders = (
+            self.env["mrp.production"]
+            .with_context(skip_confirm=True)
+            .create(backorder_vals_list)
+        )
+
+        index = 0
+        production_to_backorders = {}
+        production_ids = OrderedSet()
+
+        # Handling the backorders
+        index, production_to_backorders, production_ids = (
+            self._handle_production_to_backorders(
+                amounts,
+                _default_amounts,
+                backorders,
+                index,
+                production_to_backorders,
+                production_ids,
+            )
+        )
+
+        # Split the `stock.move` among new backorders.
+        new_moves_vals = []
+        moves = []
+        new_moves_vals, moves = self._process_stock_moves(
+            new_moves_vals, moves, production_to_backorders, initial_qty_by_production
+        )
+
+        backorder_moves = self.env["stock.move"].create(new_moves_vals)
+        # Split `stock.move.line`s. 2 options for this:
+        # - do_unreserve -> action_assign
+        # - Split the reserved amounts manually
+        # The first option would be easier to maintain since it's less code
+        # However it could be slower (due to `stock.quant` update) and could
+        # create inconsistencies in mass production if a new lot higher in a
+        # FIFO strategy arrives between the reservation and the backorder creation
+        move_to_backorder_moves = defaultdict(lambda: self.env["stock.move"])
+        for move, backorder_move in zip(moves, backorder_moves):
+            move_to_backorder_moves[move] |= backorder_move
+
+        move_lines_vals = []
+        assigned_moves = set()
+        partially_assigned_moves = set()
+        move_lines_to_unlink = set()
+
+        # Process backorder move lines
+        (
+            move_lines_vals,
+            move_lines_to_unlink,
+            assigned_moves,
+            partially_assigned_moves,
+        ) = self._process_backorder_move_lines(
+            move_lines_vals,
+            set_consumed_qty,
+            move_to_backorder_moves,
+            assigned_moves,
+            partially_assigned_moves,
+            move_lines_to_unlink,
+        )
+
+        self.env["stock.move"].browse(assigned_moves).write({"state": "assigned"})
+        self.env["stock.move"].browse(partially_assigned_moves).write(
+            {"state": "partially_available"}
+        )
+        # Avoid triggering a useless _recompute_state
+        self.env["stock.move.line"].browse(move_lines_to_unlink).write(
+            {"move_id": False}
+        )
+        self.env["stock.move.line"].browse(move_lines_to_unlink).unlink()
+        self.env["stock.move.line"].create(move_lines_vals)
+
+        # We need to adapt `duration_expected` on both the original workorders and their
+        # backordered workorders. To do that, we use the original `duration_expected`
+        # and the ratio of the quantity produced and the quantity to produce.
+        self._process_adaptation_of_workorders(
+            initial_qty_by_production, production_to_backorders
+        )
+
         backorders._action_confirm_mo_backorders()
         return self.env["mrp.production"].browse(production_ids)
 
