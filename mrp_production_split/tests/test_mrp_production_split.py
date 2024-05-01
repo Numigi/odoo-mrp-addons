@@ -22,7 +22,6 @@ class TestMrpProductionSplit(CommonCase):
     #     with self.assertRaisesRegex(UserError, r"Cannot split.*"):
     #         self._mrp_production_split(self.production)
 
-
     def test_mrp_production_split_cancel(self):
         self.production.action_cancel()
         with self.assertRaisesRegex(UserError, r"Cannot split.*"):
@@ -32,8 +31,7 @@ class TestMrpProductionSplit(CommonCase):
         self.production.action_confirm()
         self.production.action_generate_serial()
         mos = self._mrp_production_split(self.production, split_qty=2.0)
-        self.assertRecordValues(
-            mos, [dict(product_qty=3.0), dict(product_qty=2.0)])
+        self.assertRecordValues(mos, [dict(product_qty=3.0), dict(product_qty=2.0)])
 
     def test_mrp_production_split_lot_simple_copy_date_planned(self):
         dt_start = datetime.now() + timedelta(days=5)
