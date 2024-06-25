@@ -1,4 +1,4 @@
-# © 2019 Numigi
+# © 2024 Numigi
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
 {
@@ -11,9 +11,7 @@
     "category": "Other",
     "summary": "Install all addons required for testing.",
     "depends": [
-        "mrp_production_split",
-        "product_configurator_mrp_component_ext",
-        "product_configurator_mrp_enhanced",
+        "mrp",
     ],
     "installable": True,
 }
