@@ -1,5 +1,5 @@
 ===========================================
-Product Configurator Manufacturing Enhabced
+Product Configurator Manufacturing Enhanced
 ===========================================
 
 .. contents:: Table of Contents
