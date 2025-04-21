@@ -9,7 +9,7 @@
         <field name="model">mrp.production</field>
         <field name="inherit_id" ref="mrp.mrp_production_form_view" />
         <field name="arch" type="xml">
-            <button name="do_unreserve" position="after">
+            <button name="button_unreserve" position="after">
                 <button
                     name="action_set_quantities_to_reservation"
                     attrs="{'invisible': [(
