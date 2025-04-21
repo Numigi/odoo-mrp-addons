@@ -13,7 +13,10 @@ class MrpProduction(models.Model):
                 continue
             for move_line in move.move_line_ids:
                 if move.has_tracking == 'none' or (
-                        move.picking_type_id.use_existing_lots and move_line.lot_id) or (
-                        move.picking_type_id.use_create_lots and move_line.lot_name) or (
-                        not move.picking_type_id.use_existing_lots and not move.picking_type_id.use_create_lots):
+                        move.picking_type_id.use_existing_lots
+                        and move_line.lot_id) or (
+                        move.picking_type_id.use_create_lots
+                        and move_line.lot_name) or (
+                        not move.picking_type_id.use_existing_lots
+                        and not move.picking_type_id.use_create_lots):
                     move_line.qty_done = move_line.product_uom_qty

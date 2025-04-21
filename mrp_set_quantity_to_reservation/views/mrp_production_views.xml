@@ -12,7 +12,11 @@
             <button name="do_unreserve" position="after">
                 <button
                     name="action_set_quantities_to_reservation"
-                    attrs="{'invisible': [('state', 'not in', ('confirmed', 'progress'))]}"
+                    attrs="{'invisible': [(
+                    'state',
+                     'not in',
+                      ('confirmed', 'progress', 'to_close')
+                      )]}"
                     string="Set quantities"
                     type="object"
                     groups="mrp.group_mrp_user"
