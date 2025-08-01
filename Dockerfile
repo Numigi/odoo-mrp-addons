@@ -15,6 +15,7 @@ USER odoo
 
 COPY mrp_bom_cost_scheduled_action /mnt/extra-addons/mrp_bom_cost_scheduled_action
 COPY mrp_cost /mnt/extra-addons/mrp_cost
+COPY mrp_stock_account_fifo_fix_valuation /mnt/extra-addons/mrp_stock_account_fifo_fix_valuation
 COPY mrp_timesheet /mnt/extra-addons/mrp_timesheet
 COPY mrp_work_order_calendar_customer /mnt/extra-addons/mrp_work_order_calendar_customer
 

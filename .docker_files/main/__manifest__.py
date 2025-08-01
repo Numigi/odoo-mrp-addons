@@ -13,6 +13,7 @@
     "depends": [
         "mrp_bom_cost_scheduled_action",
         "mrp_cost",
+        "mrp_stock_account_fifo_fix_valuation",
         "mrp_timesheet",
         "mrp_work_order_calendar_customer",
     ],
