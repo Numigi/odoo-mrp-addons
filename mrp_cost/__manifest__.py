@@ -3,7 +3,7 @@
 
 {
     "name": "MRP Cost",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "author": "Numigi",
     "maintainer": "Numigi",
     "website": "https://bit.ly/numigi-com",
@@ -12,7 +12,13 @@
     "summary": "Recognize the accounting cost of manufacturing orders",
     "depends": [
         "mrp",
-        "account",
+        "stock_account",
+    ],
+    'data': [
+        'views/mrp_production_view.xml',
+        'views/product_view.xml',
+        'views/report_cost_analysis.xml',
+
     ],
     "installable": True,
 }

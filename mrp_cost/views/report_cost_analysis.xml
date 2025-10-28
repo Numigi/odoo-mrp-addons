@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <report
+        id="action_report_mrp_cost_analysis"
+        model="mrp.production"
+        string="Cost Analysis (MO)"
+        report_type="qweb-pdf"
+        name="mrp_cost.report_cost_analysis_template"
+        file="mrp_cost.report_cost_analysis_template"
+        print_report_name="'Cost Analysis - %s' % (object.name)"
+    />
+
+    <report
+        id="action_report_product_cost_analysis"
+        model="product.product"
+        string="Cost Analysis (Product)"
+        report_type="qweb-pdf"
+        name="mrp_cost.report_product_cost_analysis_tmpl"
+        file="mrp_cost.report_product_cost_analysis_tmpl"
+        print_report_name="'Cost Analysis - %s' % (', '.join(objects.mapped('display_name')))"
+    />
+
+
+    <template id="report_cost_analysis_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc"> <t t-call="web.basic_layout">
+                    <div class="page">
+                        <t t-set="currency" t-value="doc['currency']"/>
+
+                        <h2>Cost Analysis: <span t-field="doc['product'].display_name"/></h2>
+                        <p>
+                            Based on <t t-esc="doc['mo_count']"/> manufacturing order(s). <br/>
+                            Total Quantity Produced: <t t-esc="doc['total_finished_qty']" t-options='{"widget": "float", "decimal_precision": "Product Unit of Measure"}'/> <span t-field="doc['main_uom'].name"/>
+                        </p>
+
+                        <h3>Raw Materials</h3>
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Product</th>
+                                    <th class="text-right">Quantity</th>
+                                    <th class="text-right">Unit Cost</th>
+                                    <th class="text-right">Total Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="doc['raw_material_lines']" t-as="line">
+                                    <td><span t-field="line['product_id'].default_code"/></td>
+                                    <td>
+                                        <span t-field="line['product_id'].display_name"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-esc="line['qty']" t-options='{"widget": "float", "decimal_precision": "Product Unit of Measure"}'/>
+                                        <span t-esc="line['uom_name']"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-esc="line['unit_cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-esc="line['cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4" class="text-right"><strong>Total Raw Material Cost</strong></td>
+                                    <td class="text-right">
+                                        <strong t-esc="doc['total_raw_cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <t t-if="doc['operation_lines']">
+                             <h3>Operations</h3>
+                             <table class="table table-sm table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Operation</th>
+                                        <th>Work Center</th>
+                                        <th class="text-right">Duration (Hours)</th>
+                                        <th class="text-right">Cost/Hour</th>
+                                        <th class="text-right">Total Cost</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="doc['operation_lines']" t-as="line">
+                                        <td>
+                                            <span t-esc="line['operation_name']"/>
+                                        </td>
+                                        <td><span t-esc="line['workcenter_name']"/></td>
+                                        <td class="text-right"><span t-esc="line['duration']" t-options='{"widget": "float", "precision": 4}'/></td>
+                                        <td class="text-right"><span t-esc="line['cost_hour']" t-options='{"widget": "monetary", "display_currency": currency}'/></td>
+                                        <td class="text-right"><span t-esc="line['cost']" t-options='{"widget": "monetary", "display_currency": currency}'/></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="4" class="text-right"><strong>Total Operation Cost</strong></td>
+                                        <td class="text-right">
+                                            <strong t-esc="doc['total_ops_cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <t t-if="doc['scrap_lines']">
+                            <h3>Scraps</h3>
+                            <table class="table table-sm table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th class="text-right">Quantity</th>
+                                        <th class="text-right">Unit Cost</th>
+                                        <th class="text-right">Total Cost</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="doc['scrap_lines']" t-as="line">
+                                        <td><span t-field="line['product_id'].display_name"/></td>
+                                        <td class="text-right">
+                                            <span t-esc="line['qty']" t-options='{"widget": "float", "decimal_precision": "Product Unit of Measure"}'/>
+                                            <span t-esc="line['uom_name']"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-esc="line['unit_cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-esc="line['cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-right"><strong>Total Scrap Cost</strong></td>
+                                        <td class="text-right">
+                                            <strong t-esc="doc['total_scrap_cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <t t-if="doc['byproduct_lines']">
+                             <h3>By-Products</h3>
+                             <table class="table table-sm table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th class="text-right">Quantity</th>
+                                        <th class="text-right">Unit Value</th>
+                                        <th class="text-right">Total Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="doc['byproduct_lines']" t-as="line">
+                                        <td><span t-field="line['product_id'].display_name"/></td>
+                                        <td class="text-right">
+                                            <span t-esc="line['qty']" t-options='{"widget": "float", "decimal_precision": "Product Unit of Measure"}'/>
+                                            <span t-esc="line['uom_name']"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-esc="line['unit_value']" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-esc="line['value']" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-right"><strong>Total By-Product Value</strong></td>
+                                        <td class="text-right">
+                                            <strong t-esc="doc['total_byproduct_value']" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <div class="row mt-4">
+                            <div class="col-6 offset-6">
+                                <table class="table table-sm">
+                                     <tr>
+                                         <td><strong>Total Production Cost</strong></td>
+                                         <td class="text-right">
+                                             <strong t-esc="doc['net_total_cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                         </td>
+                                     </tr>
+                                     <tr>
+                                         <td><strong>Unit Cost</strong></td>
+                                         <td class="text-right">
+                                             <strong t-esc="doc['unit_cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                         </td>
+                                     </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                    <p style="page-break-after: always;"></p>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_product_cost_analysis_tmpl">
+        <t t-call="mrp_cost.report_cost_analysis_template"/>
+    </template>
+
+</odoo>

@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
 from odoo import api, fields, models
-
+from odoo.tools import float_is_zero
 
 class MrpProduction__mrp_cost(models.Model):
 
@@ -56,3 +56,134 @@ class MrpProduction__mrp_cost(models.Model):
     def __get_unrecorded_time_lines(self):
         return self.mapped("workorder_ids.time_ids").filtered(lambda line: 
             line.date_end and not line.cost_already_recorded)
+
+    @api.multi
+    def action_view_cost_analysis(self):
+        """ Redirects to the Cost Analysis report """
+        self.ensure_one()
+        # Ensure the report action ID matches the one defined in XML
+        action = self.env.ref(
+            'mrp_cost.action_report_mrp_cost_analysis').report_action(
+            self)
+        return action
+
+    def _get_raw_material_costs(self):
+        """
+        Calculate the total cost of raw materials consumed.
+        Relies on stock valuation layers (stock.valuation.layer) or move valuation (value field).
+        This simplified version uses the 'value' field from 'stock.move'.
+        For FIFO/AVCO, the 'value' on the move reflects the actual cost.
+        For Standard Price, it reflects the standard cost.
+        """
+        self.ensure_one()
+        # Find moves that consumed materials for this production order
+        consumed_moves = self.move_raw_ids.filtered(
+            lambda m: m.state == 'done' and not m.scrapped)
+        total_cost = 0.0
+        lines_data = []
+        # Sum the absolute value as consumed moves have negative values
+        for move in consumed_moves:
+            # Value should be negative for consumed goods, use abs() or *-1
+            move_cost = abs(move.value)
+            total_cost += move_cost
+            lines_data.append(
+                {'product_id': move.product_id, 'qty': move.product_uom_qty,
+                    # Quantity in the move's UoM
+                    'uom_name': move.product_uom.name, 'cost': move_cost,
+                    'unit_cost': abs(move.price_unit) if not float_is_zero(
+                        move.product_uom_qty,
+                        precision_rounding=move.product_uom.rounding) else 0.0,
+                    # Or move_cost / move.product_uom_qty
+                    'bom_line_id': move.bom_line_id.id if move.bom_line_id else None
+                    # For linking in the report
+                })
+        return total_cost, lines_data
+
+    def _get_operation_costs(self):
+        """
+        Calculate the total cost of manufacturing operations based on work orders,
+        duration, and workcenter hourly costs.
+        """
+        self.ensure_one()
+        total_cost = 0.0
+        lines_data = []
+        # Iterate through work orders linked to this production
+        for workorder in self.workorder_ids:
+            # Duration is expected in minutes, convert to hours
+            duration_hours = workorder.duration / 60.0
+            cost_hour = workorder.workcenter_id.costs_hour
+            operation_cost = duration_hours * cost_hour
+            total_cost += operation_cost
+
+            # Fetch productivity lines for operator detail (optional, adds complexity)
+            # This part just shows the total per operation/workcenter
+            lines_data.append({
+                'operation_id': workorder.operation_id.id if workorder.operation_id else None,
+                # For linking
+                'operation_name': workorder.operation_id.name if workorder.operation_id else workorder.name,
+                'workcenter_name': workorder.workcenter_id.name,
+                'duration': duration_hours, 'cost_hour': cost_hour,
+                'cost': operation_cost,
+                # 'operator': 'Operator Name if tracked', # Requires more logic if using productivity lines
+            })
+        return total_cost, lines_data
+
+    def _get_scrap_costs(self):
+        """
+        Calculate the total cost of scrapped materials.
+        This relies on the 'value' of the scrap moves.
+        """
+        self.ensure_one()
+        total_cost = 0.0
+        lines_data = []
+        scrap_moves = self.env['stock.move'].search(
+            [('production_id', '=', self.id), ('scrapped', '=', True),
+                ('state', '=', 'done')])
+        # Alternative: Search stock.scrap linked to production_id
+        # scraps = self.env['stock.scrap'].search([('production_id', '=', self.id)])
+
+        for move in scrap_moves:
+            # Value might be positive or negative depending on context, use abs()
+            move_cost = abs(move.value)
+            total_cost += move_cost
+            lines_data.append(
+                {'product_id': move.product_id, 'qty': move.product_uom_qty,
+                    'uom_name': move.product_uom.name, 'cost': move_cost,
+                    'unit_cost': abs(move.price_unit) if not float_is_zero(
+                        move.product_uom_qty,
+                        precision_rounding=move.product_uom.rounding) else 0.0, })
+        return total_cost, lines_data
+
+    def _get_byproduct_costs_and_qty(self):
+        """
+        Calculate the value and quantity of by-products produced.
+        By-products typically reduce the overall cost of the main product.
+        Their value might be based on their own standard price or cost.
+        """
+        self.ensure_one()
+        total_value = 0.0  # By-products usually have a value, reducing net cost
+        lines_data = []
+        # Find finished moves that are NOT the main product
+        byproduct_moves = self.move_finished_ids.filtered(
+            lambda m: m.state == 'done' and m.product_id != self.product_id)
+        for move in byproduct_moves:
+            # Value is usually positive for produced goods
+            move_value = move.value
+            total_value += move_value
+            lines_data.append(
+                {'product_id': move.product_id, 'qty': move.product_uom_qty,
+                    'uom_name': move.product_uom.name, 'value': move_value,
+                    # This is the value credited
+                    'unit_value': move.price_unit if not float_is_zero(
+                        move.product_uom_qty,
+                        precision_rounding=move.product_uom.rounding) else 0.0, })
+        return total_value, lines_data
+
+    def _get_finished_product_data(self):
+        """ Get quantity and UoM for the main finished product. """
+        self.ensure_one()
+        finished_moves = self.move_finished_ids.filtered(
+            lambda m: m.state == 'done' and m.product_id == self.product_id)
+        total_qty = sum(finished_moves.mapped('product_uom_qty'))
+        uom = self.product_uom_id  # Assume all finished moves use the MO's UoM for simplicity
+        return total_qty, uom
