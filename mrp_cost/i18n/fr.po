@@ -1,71 +1,210 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* sale_order_available_qty_popover
+#	* mrp_cost
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0+e\n"
+"Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-09 19:46+0000\n"
-"PO-Revision-Date: 2020-03-09 19:46+0000\n"
-"Last-Translator: <>\n"
+"POT-Creation-Date: 2025-11-13 16:09+0000\n"
+"PO-Revision-Date: 2025-11-13 16:09+0000\n"
+"Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
 
-#. module: sale_order_available_qty_popover
-#: model:ir.model.fields,help:sale_order_available_qty_popover.field_sale_order_line__product_type
-msgid "A storable product is a product for which you manage stock. The Inventory app has to be installed.\n"
-"A consumable product is a product for which stock is not managed.\n"
-"A service is a non-material product you provide."
-msgstr ""
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "<strong>Total By-Product Value</strong>"
+msgstr "<strong>Valeur totale des sous-produits</strong>"
 
-#. module: sale_order_available_qty_popover
-#. openerp-web
-#: code:addons/sale_order_available_qty_popover/static/src/js/popover.js:53
-#, python-format
-msgid "Availability"
-msgstr "Disponibilité"
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "<strong>Total Operation Cost</strong>"
+msgstr "<strong>Coût total des opérations</strong>"
 
-#. module: sale_order_available_qty_popover
-#. openerp-web
-#: code:addons/sale_order_available_qty_popover/static/src/xml/popover.xml:11
-#, python-format
-msgid "Available"
-msgstr "En stock"
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "<strong>Total Production Cost</strong>"
+msgstr "<strong>Coût total de production</strong>"
 
-#. module: sale_order_available_qty_popover
-#: model:ir.model.fields,field_description:sale_order_available_qty_popover.field_sale_order_line__available_qty_for_popover
-msgid "Available Qty For Popover"
-msgstr "Quantitée disponible pour le popup"
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "<strong>Total Raw Material Cost</strong>"
+msgstr "<strong>Coût total des matières premières</strong>"
 
-#. module: sale_order_available_qty_popover
-#. openerp-web
-#: code:addons/sale_order_available_qty_popover/static/src/js/popover.js:64
-#, python-format
-msgid "Available Quantity"
-msgstr "Quantité disponible"
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "<strong>Total Scrap Cost</strong>"
+msgstr "<strong>Coût total des rebuts</strong>"
 
-#. module: sale_order_available_qty_popover
-#: model:ir.model.fields,field_description:sale_order_available_qty_popover.field_sale_order_line__product_type
-msgid "Product Type"
-msgstr ""
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "<strong>Unit Cost</strong>"
+msgstr "<strong>Coût unitaire</strong>"
 
-#. module: sale_order_available_qty_popover
-#: model:ir.model,name:sale_order_available_qty_popover.model_sale_order
-msgid "Sale Order"
-msgstr ""
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "Based on"
+msgstr "Basé sur"
 
-#. module: sale_order_available_qty_popover
-#: model:ir.model,name:sale_order_available_qty_popover.model_sale_order_line
-msgid "Sales Order Line"
-msgstr ""
+#. module: mrp_cost
+#: model:ir.model.fields,field_description:mrp_cost.field_product_product__bom_count
+#: model:ir.model.fields,field_description:mrp_cost.field_product_template__bom_count
+msgid "BoM Count"
+msgstr "Nombre de Nomenclatures"
 
-#. module: sale_order_available_qty_popover
-#. openerp-web
-#: code:addons/sale_order_available_qty_popover/static/src/xml/popover.xml:17
-#, python-format
-msgid "This information includes all reserved quantities in all warehouses."
-msgstr "Cette information tient compte des quantités réservées pour tous les entrepôts."
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "By-Products"
+msgstr "Sous-produits"
+
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "Code"
+msgstr "Code"
+
+#. module: mrp_cost
+#: model:ir.model.fields,field_description:mrp_cost.field_mrp_workcenter_productivity__cost_already_recorded
+msgid "Cost Already Recorded"
+msgstr "Coût déjà enregistré"
+
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.mrp_production_form_view_inherit_cost_analysis
+#: model_terms:ir.ui.view,arch_db:mrp_cost.product_product_form_view_inherit_cost_analysis
+#: model_terms:ir.ui.view,arch_db:mrp_cost.product_template_form_view_inherit_cost_analysis
+msgid "Cost Analysis"
+msgstr "Analyse des coûts"
+
+#. module: mrp_cost
+#: model:ir.actions.report,name:mrp_cost.action_report_mrp_cost_analysis
+msgid "Cost Analysis (MO)"
+msgstr "Analyse des coûts (OF)"
+
+#. module: mrp_cost
+#: model:ir.actions.report,name:mrp_cost.action_report_product_cost_analysis
+msgid "Cost Analysis (Product)"
+msgstr "Analyse des coûts (Article)"
+
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "Cost Analysis:"
+msgstr "Analyse des coûts :"
+
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "Cost/Hour"
+msgstr "Coût/Heure"
+
+#. module: mrp_cost
+#: model:ir.model.fields,field_description:mrp_cost.field_report_mrp_cost_report_cost_analysis_template__display_name
+#: model:ir.model.fields,field_description:mrp_cost.field_report_mrp_cost_report_product_cost_analysis_tmpl__display_name
+msgid "Display Name"
+msgstr "Nom affiché"
+
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "Duration (Hours)"
+msgstr "Durée (Heures)"
+
+#. module: mrp_cost
+#: model:ir.model.fields,field_description:mrp_cost.field_report_mrp_cost_report_cost_analysis_template__id
+#: model:ir.model.fields,field_description:mrp_cost.field_report_mrp_cost_report_product_cost_analysis_tmpl__id
+msgid "ID"
+msgstr "ID"
+
+#. module: mrp_cost
+#: model:ir.model.fields,field_description:mrp_cost.field_report_mrp_cost_report_cost_analysis_template____last_update
+#: model:ir.model.fields,field_description:mrp_cost.field_report_mrp_cost_report_product_cost_analysis_tmpl____last_update
+msgid "Last Modified on"
+msgstr "Dernière modification le"
+
+#. module: mrp_cost
+#: model:ir.model,name:mrp_cost.model_report_mrp_cost_report_cost_analysis_template
+msgid "MRP Cost Analysis Report"
+msgstr "Rapport d'analyse des coûts de fabrication"
+
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "Operation"
+msgstr "Opération"
+
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "Operations"
+msgstr "Opérations"
+
+#. module: mrp_cost
+#: model:ir.model,name:mrp_cost.model_product_product
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "Product"
+msgstr "Article"
+
+#. module: mrp_cost
+#: model:ir.model,name:mrp_cost.model_report_mrp_cost_report_product_cost_analysis_tmpl
+msgid "Product Cost Analysis Report"
+msgstr "Rapport d'analyse des coûts de l'article"
+
+#. module: mrp_cost
+#: model:ir.model,name:mrp_cost.model_product_template
+msgid "Product Template"
+msgstr "Modèle d'article"
+
+#. module: mrp_cost
+#: model:ir.model,name:mrp_cost.model_mrp_production
+msgid "Production Order"
+msgstr "Ordre de fabrication"
+
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "Quantity"
+msgstr "Quantité"
+
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "Raw Materials"
+msgstr "Matières premières"
+
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "Scraps"
+msgstr "Rebuts"
+
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "Total Cost"
+msgstr "Coût total"
+
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "Total Value"
+msgstr "Valeur totale"
+
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "Unit Cost"
+msgstr "Coût unitaire"
+
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "Unit Value"
+msgstr "Valeur unitaire"
+
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "Work Center"
+msgstr "Poste de charge"
+
+#. module: mrp_cost
+#: model:ir.model,name:mrp_cost.model_mrp_workcenter_productivity
+msgid "Workcenter Productivity Log"
+msgstr "Journal de productivité du poste de charge"
+
+#. module: mrp_cost
+#: model_terms:ir.ui.view,arch_db:mrp_cost.report_cost_analysis_template
+msgid "manufacturing order(s). <br/>\n"
+"Total Quantity Produced:"
+msgstr "ordre(s) de fabrication. <br/>\n"
+"Quantité totale produite :"
