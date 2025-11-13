@@ -20,14 +20,9 @@ class ReportCostAnalysis(models.AbstractModel):
                 'message': 'Aucun ordre de fabrication terminé trouvé.'}
 
         products_data = {}
-
-        # --- CORRECTION ODOO 12 ---
-        # 1. Récupérer les produits uniques
         products = productions.mapped('product_id')
 
-        # 2. Itérer directement sur le RecordSet des produits (pas de .items())
         for product in products:
-            # 3. Filtrer manuellement les OFs pour ce produit
             mos = productions.filtered(lambda p: p.product_id == product)
 
             # --- Le reste du code reste identique ---
@@ -73,7 +68,6 @@ class ReportCostAnalysis(models.AbstractModel):
 
             main_uom = mos[0].product_uom_id if mos else self.env['uom.uom']
 
-            # On utilise product.id comme clé pour le dictionnaire final
             products_data[product.id] = {'product': product,
                 'total_finished_qty': total_finished_qty, 'main_uom': main_uom,
                 'mo_count': len(mos), 'raw_material_lines': final_raw_lines,
