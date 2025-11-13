@@ -2,6 +2,7 @@
 # Part of the new public module for MRP cost analysis.
 
 from odoo import api, models
+from odoo.tools import float_is_zero
 
 class ReportCostAnalysis(models.AbstractModel):
     """ Abstract Model for Cost Analysis report QWeb """
@@ -10,29 +11,26 @@ class ReportCostAnalysis(models.AbstractModel):
 
     @api.model
     def _get_report_values(self, docids, data=None):
-        """ Fetch data for the report """
         docs = []
-        productions = self.env['mrp.production'].browse(docids).filtered(lambda p: p.state == 'done')
+        productions = self.env['mrp.production'].browse(docids).filtered(
+            lambda p: p.state == 'done')
 
         if not productions:
-             # Handle cases where no production orders are done or found
-             # Maybe raise an error or return an empty structure
-             # For now, return structure indicating no MOs processed
-             return {
-                 'doc_ids': docids,
-                 'doc_model': 'mrp.production',
-                 'docs': [],
-                 'message': 'No completed Manufacturing Orders found for the selection.'
-             }
+            return {'doc_ids': docids, 'doc_model': 'mrp.production', 'docs': [],
+                'message': 'Aucun ordre de fabrication terminé trouvé.'}
 
-
-        # Group productions by finished product for the report structure
-        # Similar to the original get_lines logic
         products_data = {}
-        product_productions = productions.grouped('product_id')
 
-        for product, mos in product_productions.items():
-            # Get costs for this group of MOs producing the same product
+        # --- CORRECTION ODOO 12 ---
+        # 1. Récupérer les produits uniques
+        products = productions.mapped('product_id')
+
+        # 2. Itérer directement sur le RecordSet des produits (pas de .items())
+        for product in products:
+            # 3. Filtrer manuellement les OFs pour ce produit
+            mos = productions.filtered(lambda p: p.product_id == product)
+
+            # --- Le reste du code reste identique ---
             total_raw_cost = 0.0
             total_ops_cost = 0.0
             total_scrap_cost = 0.0
@@ -62,48 +60,35 @@ class ReportCostAnalysis(models.AbstractModel):
                 all_scrap_lines.extend(scrap_lines)
                 all_byproduct_lines.extend(byproduct_lines)
 
-            # Consolidate lines data if needed (e.g., group raw materials by product)
-            # For simplicity, we pass all lines for now. Template can group/sum.
+            # Consolidate lines data
             final_raw_lines = self._consolidate_lines(all_raw_lines, ['product_id'])
-            final_ops_lines = self._consolidate_lines(all_ops_lines, ['operation_id', 'workcenter_name']) # Or just operation_id
+            final_ops_lines = self._consolidate_lines(all_ops_lines,
+                ['operation_id', 'workcenter_name'])
             final_scrap_lines = self._consolidate_lines(all_scrap_lines, ['product_id'])
-            final_byproduct_lines = self._consolidate_lines(all_byproduct_lines, ['product_id'])
+            final_byproduct_lines = self._consolidate_lines(all_byproduct_lines,
+                ['product_id'])
 
-
-            # Calculate net cost and unit cost
             net_total_cost = total_raw_cost + total_ops_cost + total_scrap_cost - total_byproduct_value
             unit_cost = net_total_cost / total_finished_qty if total_finished_qty else 0.0
 
-            # Get the UoM from the first MO (assuming consistency)
             main_uom = mos[0].product_uom_id if mos else self.env['uom.uom']
 
-            products_data[product.id] = {
-                'product': product,
-                'total_finished_qty': total_finished_qty,
-                'main_uom': main_uom,
-                'mo_count': len(mos),
-                'raw_material_lines': final_raw_lines,
-                'operation_lines': final_ops_lines,
-                'scrap_lines': final_scrap_lines,
-                'byproduct_lines': final_byproduct_lines, # Use byproduct value later
-                'total_raw_cost': total_raw_cost,
-                'total_ops_cost': total_ops_cost,
+            # On utilise product.id comme clé pour le dictionnaire final
+            products_data[product.id] = {'product': product,
+                'total_finished_qty': total_finished_qty, 'main_uom': main_uom,
+                'mo_count': len(mos), 'raw_material_lines': final_raw_lines,
+                'operation_lines': final_ops_lines, 'scrap_lines': final_scrap_lines,
+                'byproduct_lines': final_byproduct_lines,
+                'total_raw_cost': total_raw_cost, 'total_ops_cost': total_ops_cost,
                 'total_scrap_cost': total_scrap_cost,
                 'total_byproduct_value': total_byproduct_value,
-                'net_total_cost': net_total_cost,
-                'unit_cost': unit_cost,
-                'currency': self.env.user.company_id.currency_id, # Currency from company
-            }
+                'net_total_cost': net_total_cost, 'unit_cost': unit_cost,
+                'currency': self.env.user.company_id.currency_id, }
 
-        # Convert dict to list for the template
         docs = list(products_data.values())
 
-        return {
-            'doc_ids': docids,
-            'doc_model': 'mrp.production',
-            'docs': docs, # This list contains the aggregated data per product
-            'message': False # No error message
-        }
+        return {'doc_ids': docids, 'doc_model': 'mrp.production', 'docs': docs,
+            'message': False}
 
     def _consolidate_lines(self, lines, group_keys):
         """ Helper to group and sum lines based on keys """
