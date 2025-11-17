@@ -4,7 +4,7 @@
         id="action_report_mrp_cost_analysis"
         model="mrp.production"
         string="Cost Analysis (MO)"
-        report_type="qweb-pdf"
+        report_type="qweb-html"
         name="mrp_cost.report_cost_analysis_template"
         file="mrp_cost.report_cost_analysis_template"
         print_report_name="'Cost Analysis - %s' % (object.name)"
@@ -14,16 +14,16 @@
         id="action_report_product_cost_analysis"
         model="product.product"
         string="Cost Analysis (Product)"
-        report_type="qweb-pdf"
+        report_type="qweb-html"
         name="mrp_cost.report_product_cost_analysis_tmpl"
         file="mrp_cost.report_product_cost_analysis_tmpl"
         print_report_name="'Cost Analysis - %s' % (', '.join(objects.mapped('display_name')))"
     />
 
-
     <template id="report_cost_analysis_template">
         <t t-call="web.html_container">
-            <t t-foreach="docs" t-as="doc"> <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.basic_layout">
                     <div class="page">
                         <t t-set="currency" t-value="doc['currency']"/>
 
@@ -75,6 +75,7 @@
                              <table class="table table-sm table-bordered">
                                 <thead>
                                     <tr>
+                                        <th>Operator</th>
                                         <th>Operation</th>
                                         <th>Work Center</th>
                                         <th class="text-right">Duration (Hours)</th>
@@ -85,6 +86,9 @@
                                 <tbody>
                                     <tr t-foreach="doc['operation_lines']" t-as="line">
                                         <td>
+                                            <span t-esc="line.get('operator')"/>
+                                        </td>
+                                        <td>
                                             <span t-esc="line['operation_name']"/>
                                         </td>
                                         <td><span t-esc="line['workcenter_name']"/></td>
@@ -93,7 +97,7 @@
                                         <td class="text-right"><span t-esc="line['cost']" t-options='{"widget": "monetary", "display_currency": currency}'/></td>
                                     </tr>
                                     <tr>
-                                        <td colspan="4" class="text-right"><strong>Total Operation Cost</strong></td>
+                                        <td colspan="5" class="text-right"><strong>Total Operation Cost</strong></td>
                                         <td class="text-right">
                                             <strong t-esc="doc['total_ops_cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
                                         </td>
@@ -176,17 +180,11 @@
                             <div class="col-6 offset-6">
                                 <table class="table table-sm">
                                      <tr>
-                                         <td><strong>Total Production Cost</strong></td>
-                                         <td class="text-right">
-                                             <strong t-esc="doc['net_total_cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
-                                         </td>
-                                     </tr>
-                                     <tr>
-                                         <td><strong>Unit Cost</strong></td>
-                                         <td class="text-right">
-                                             <strong t-esc="doc['unit_cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
-                                         </td>
-                                     </tr>
+                                        <td colspan="5" class="text-right"><strong>Unit Cost</strong></td>
+                                        <td class="text-right">
+                                              <strong t-esc="doc['unit_cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        </td>
+                                    </tr>
                                 </table>
                             </div>
                         </div>
