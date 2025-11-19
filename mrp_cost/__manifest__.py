@@ -3,7 +3,7 @@
 
 {
     "name": "MRP Cost",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "author": "Numigi",
     "maintainer": "Numigi",
     "website": "https://bit.ly/numigi-com",

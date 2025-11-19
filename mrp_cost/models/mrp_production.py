@@ -101,31 +101,63 @@ class MrpProduction__mrp_cost(models.Model):
 
     def _get_operation_costs(self):
         """
-        Calculate the total cost of manufacturing operations based on work orders,
-        duration, and workcenter hourly costs.
+        Calculate the total cost of manufacturing operations based on time lines.
+        Now includes Operator detail grouped by Operation + Operator.
         """
         self.ensure_one()
         total_cost = 0.0
         lines_data = []
-        # Iterate through work orders linked to this production
-        for workorder in self.workorder_ids:
-            # Duration is expected in minutes, convert to hours
-            duration_hours = workorder.duration / 60.0
-            cost_hour = workorder.workcenter_id.costs_hour
-            operation_cost = duration_hours * cost_hour
-            total_cost += operation_cost
 
-            # Fetch productivity lines for operator detail (optional, adds complexity)
-            # This part just shows the total per operation/workcenter
-            lines_data.append({
-                'operation_id': workorder.operation_id.id if workorder.operation_id else None,
-                # For linking
-                'operation_name': workorder.operation_id.name if workorder.operation_id else workorder.name,
-                'workcenter_name': workorder.workcenter_id.name,
-                'duration': duration_hours, 'cost_hour': cost_hour,
-                'cost': operation_cost,
-                # 'operator': 'Operator Name if tracked', # Requires more logic if using productivity lines
-            })
+        for workorder in self.workorder_ids:
+            # Case 1: The work order has detailed time lines (tracking)
+            if workorder.time_ids:
+                # Dictionary to group by operator on this work order
+                # Key: User ID (or 'Unknown' if empty)
+                ops_by_user = {}
+
+                for time_line in workorder.time_ids:
+                    # time_line is a mrp.workcenter.productivity record
+                    user = time_line.user_id
+                    user_id = user.id if user else False
+                    operator_name = user.name if user else "Unknown"
+
+                    # Duration in hours
+                    duration_hours = time_line.duration / 60.0
+                    cost_hour = time_line.workcenter_id.costs_hour
+                    cost = duration_hours * cost_hour
+
+                    if user_id not in ops_by_user:
+                        ops_by_user[user_id] = {
+                            'operation_id': workorder.operation_id.id if workorder.operation_id else None,
+                            'operation_name': workorder.operation_id.name if workorder.operation_id else workorder.name,
+                            'workcenter_name': workorder.workcenter_id.name,
+                            'operator': operator_name, 'duration': 0.0,
+                            'cost_hour': cost_hour, 'cost': 0.0, }
+
+                    # Sum of durations and costs for this operator
+                    ops_by_user[user_id]['duration'] += duration_hours
+                    ops_by_user[user_id]['cost'] += cost
+
+                # Add consolidated lines to the main list
+                for user_id, data in ops_by_user.items():
+                    lines_data.append(data)
+                    total_cost += data['cost']
+
+            # Case 2: No time lines, but a manual duration on the work order
+            elif workorder.duration > 0:
+                duration_hours = workorder.duration / 60.0
+                cost_hour = workorder.workcenter_id.costs_hour
+                operation_cost = duration_hours * cost_hour
+
+                lines_data.append({
+                    'operation_id': workorder.operation_id.id if workorder.operation_id else None,
+                    'operation_name': workorder.operation_id.name if workorder.operation_id else workorder.name,
+                    'workcenter_name': workorder.workcenter_id.name,
+                    'operator': 'Unspecified',  # No time_ids = no tracked operator
+                    'duration': duration_hours, 'cost_hour': cost_hour,
+                    'cost': operation_cost, })
+                total_cost += operation_cost
+
         return total_cost, lines_data
 
     def _get_scrap_costs(self):
