@@ -83,4 +83,3 @@ msgstr "Mise à jour coût article depuis nomenclature"
 #: model:ir.cron,name:mrp_bom_cost_scheduled_action.ir_cron_update_bom_cost
 msgid "Update product cost from BoM"
 msgstr "Mise à jour coût article depuis nomenclature"
-
