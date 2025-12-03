@@ -1,5 +1,5 @@
 MRP Workorder Calendar Customer
-=============================== 
+===============================
 This module allows to visualize product and partner information on calendar view of workorder.
 
 

@@ -17,7 +17,7 @@
         report_type="qweb-html"
         name="mrp_cost.report_product_cost_analysis_tmpl"
         file="mrp_cost.report_product_cost_analysis_tmpl"
-        print_report_name="'Cost Analysis - %s' % (', '.join(objects.mapped('display_name')))"
+        print_report_name="'Cost Analysis - %s' % (object.display_name)"
     />
 
     <template id="report_cost_analysis_template">

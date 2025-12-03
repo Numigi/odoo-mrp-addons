@@ -54,7 +54,7 @@ class MrpProduction__mrp_cost(models.Model):
         lines.write({"cost_already_recorded": True})
 
     def __get_unrecorded_time_lines(self):
-        return self.mapped("workorder_ids.time_ids").filtered(lambda line: 
+        return self.mapped("workorder_ids.time_ids").filtered(lambda line:
             line.date_end and not line.cost_already_recorded)
 
     @api.multi

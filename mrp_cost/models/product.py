@@ -40,23 +40,9 @@ class ProductProduct(models.Model):
     # Field to make button visibility easier on the product.product form
     bom_count = fields.Integer(compute='_compute_bom_count', string='BoM Count')
 
-    @api.multi
-    @api.depends('bom_ids')
-    def _compute_bom_count(self):
-        """ Compute if this specific product variant has a BoM. """
-        for product in self:
-            # Count BoMs where this product is the main output
-            product.bom_count = self.env['mrp.bom'].search_count([
-                '|',
-                ('product_id', '=', product.id),
-                '&',
-                ('product_id', '=', False),
-                ('product_tmpl_id', '=', product.product_tmpl_id.id)
-            ])
-
 
     @api.multi
-    def action_view_cost_analysis_product(self):
+    def action_view_cost_analysis_template(self):
         """ Redirects to the Cost Analysis report for this product variant """
         self.ensure_one()
         # Ensure the report action ID matches the one defined in XML

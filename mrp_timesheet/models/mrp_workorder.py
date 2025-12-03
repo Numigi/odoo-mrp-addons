@@ -77,4 +77,3 @@ class MrpWorkcenterProductivity(models.Model):
             if line.account_analytic_line_id:
                 line.account_analytic_line_id.unlink()
         return super().unlink()
-
