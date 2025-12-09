@@ -180,11 +180,17 @@
                             <div class="col-6 offset-6">
                                 <table class="table table-sm">
                                      <tr>
-                                        <td colspan="5" class="text-right"><strong>Unit Cost</strong></td>
-                                        <td class="text-right">
-                                              <strong t-esc="doc['unit_cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
-                                        </td>
-                                    </tr>
+                                         <td><strong>Total Production Cost</strong></td>
+                                         <td class="text-right">
+                                             <strong t-esc="doc['net_total_cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                         </td>
+                                     </tr>
+                                     <tr>
+                                         <td><strong>Unit Cost</strong></td>
+                                         <td class="text-right">
+                                             <strong t-esc="doc['unit_cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                         </td>
+                                     </tr>
                                 </table>
                             </div>
                         </div>
